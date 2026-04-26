@@ -6,6 +6,7 @@
 *.lo
 *.o
 *.obj
+obj/
 
 # Precompiled Headers
 *.gch
@@ -38,6 +39,7 @@
 *.exe
 *.out
 *.app
+v1
 
 # Build directories
 build/
@@ -48,9 +50,15 @@ build-*/
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
-Makefile
 install_manifest.txt
 compile_commands.json
+
+# MacOS & OS files
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/
 
 # Temporary files
 *.tmp
