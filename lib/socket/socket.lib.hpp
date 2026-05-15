@@ -26,7 +26,7 @@ public:
     } else {
       std::cout << "Socket created successfully.\n";
     }
-    // in standard socket connection OS adds a time-delay of 60 sec, after
+    // In standard socket connection OS adds a time-delay of 60 sec, after
     // socket connection termination to make sure that all the packets are
     // transfered correctly and no data is lost. to turn off this feature and
     // reuse the port immediately after termination we use SO_REUSEADDR.
@@ -47,12 +47,17 @@ public:
   }
   // Terminate Method for the util
   void terminate() {
+    if (socketFD == -1)
+      return;
     shutdown(socketFD, SHUT_RDWR);
     close(socketFD);
+    socketFD = -1;
     std::cout << "Socket closed successfully.\n";
   }
   // Destructor
   ~TCP_socket() { terminate(); }
+
+  // Method to create a socket address
   struct sockaddr_in getSocketAddress(const char *ip, int port) {
     struct sockaddr_in address;
     address.sin_port = htons(port);
@@ -63,25 +68,48 @@ public:
       inet_pton(AF_INET, ip, &address.sin_addr.s_addr);
     return address;
   }
+
   // Method to connect a client to a server socket
   int connectToIPV4(const char *ip, int port) {
+    if (socketFD == -1) {
+      std::cerr << "ERROR:: Socket not initialized.\n";
+    }
     struct sockaddr_in address = getSocketAddress(ip, port);
     return connect(socketFD, (struct sockaddr *)&address, sizeof(address));
   }
+
   // Method to listen for a incomming clients
   void listenClient(int backlog = 10) {
+    if (socketFD == -1) {
+      std::cerr << "ERROR:: Socket not initialized.\n";
+      return;
+    }
+
     if (listen(socketFD, backlog) < 0) {
       std::cerr << "ERROR:: Socket Listening Failed.\n";
     } else {
       std::cout << "Socket listening on port " << port << ".\n";
     }
   }
+
   // Method to send data
   int sendData(const char *data) {
+    if (socketFD == -1) {
+      std::cerr << "ERROR:: Socket not initialized.\n";
+      return -1;
+    }
     return send(socketFD, data, strlen(data), 0);
   }
+
   // Method to receive Data
-  int receiveData(char *buff, int sz) { return recv(socketFD, buff, sz, 0); }
+  int receiveData(char *buff, int sz) {
+    if (socketFD == -1) {
+      std::cerr << "ERROR:: Socket not initialized.\n";
+      return -1;
+    }
+    return recv(socketFD, buff, sz, 0);
+  }
+
   // To Return the socket fd
   int getSocketFD() { return socketFD; }
 };

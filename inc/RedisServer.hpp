@@ -5,7 +5,7 @@
 class RedisServer {
 public:
   RedisServer(int port);
-  void run();
+  void listen();
   void terminate();
 
 private:
