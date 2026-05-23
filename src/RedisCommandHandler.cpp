@@ -38,6 +38,9 @@ std::vector<std::string> parseCommand(std::string command) {
   return response;
 }
 
+RedisCommandHandler::RedisCommandHandler() {}
+RedisCommandHandler::~RedisCommandHandler() {}
+
 std::string RedisCommandHandler::processCommand(std::string command) {
   std::vector<std::string> tokens = parseCommand(command);
   if (tokens.size() == 0)
@@ -48,5 +51,6 @@ std::string RedisCommandHandler::processCommand(std::string command) {
 
   // check to database
   // check command type
-  return std::string();
+  
+  return "+OK\r\n"; // Temporary valid RESP response to prevent client hang
 }

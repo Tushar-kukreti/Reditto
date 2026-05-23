@@ -4,7 +4,7 @@
 #include <thread>
 
 int main(int argc, char **argv) {
-  int port = 6396;
+  int port = 6379;
   if (argc > 1) {
     port = std::stoi(argv[1]);
   }

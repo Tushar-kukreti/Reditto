@@ -78,6 +78,17 @@ public:
     return connect(socketFD, (struct sockaddr *)&address, sizeof(address));
   }
 
+  // Method to Accept incomming Clients
+  int acceptClient() {
+    int clientSocket = accept(socketFD, nullptr, nullptr);
+    if (clientSocket < 0) {
+      std::cerr << "ERROR:: Failed to Accept the client connection.";
+      return -1;
+    }
+    std::cout << "Client Connected on port " << port << ".\n";
+    return clientSocket;
+  }
+
   // Method to listen for a incomming clients
   void listenClient(int backlog = 10) {
     if (socketFD == -1) {
@@ -93,24 +104,48 @@ public:
   }
 
   // Method to send data
-  int sendData(const char *data) {
-    if (socketFD == -1) {
+  int sendData(const char *data, int sz, int customSocketFD = -1) {
+    if (customSocketFD == -1)
+      customSocketFD = socketFD;
+    if (customSocketFD == -1) {
       std::cerr << "ERROR:: Socket not initialized.\n";
       return -1;
     }
-    return send(socketFD, data, strlen(data), 0);
+    int bytes_sent = send(customSocketFD, data, sz, 0);
+    if (bytes_sent < 0)
+      std::cerr << "ERROR:: Failed to send data.\n";
+    return bytes_sent;
   }
 
   // Method to receive Data
-  int receiveData(char *buff, int sz) {
-    if (socketFD == -1) {
+  int receiveData(char *buff, int sz, int customSocketFD = -1) {
+    if (customSocketFD == -1)
+      customSocketFD = socketFD;
+    if (customSocketFD == -1) {
       std::cerr << "ERROR:: Socket not initialized.\n";
       return -1;
     }
-    return recv(socketFD, buff, sz, 0);
+    int bytes_recv = recv(customSocketFD, buff, sz - 1, 0);
+    if (bytes_recv <= 0) {
+      std::cerr << "ERROR:: Failed to receive data.\n";
+      return -1;
+    }
+    buff[bytes_recv] = '\0';
+    return bytes_recv;
   }
 
   // To Return the socket fd
   int getSocketFD() { return socketFD; }
+
+  // To close socket fd
+  void closeSocket(int customSocketFD = -1) {
+    if (customSocketFD == -1)
+      customSocketFD = socketFD;
+    if (customSocketFD == -1)
+      return;
+    close(customSocketFD);
+    if (customSocketFD == socketFD)
+      socketFD = -1;
+  }
 };
 #endif
