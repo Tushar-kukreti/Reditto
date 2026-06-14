@@ -1,6 +1,7 @@
 #ifndef SOCKET_LIB_HPP
 #define SOCKET_LIB_HPP
 #include <arpa/inet.h> // inet_pton()
+#include "../../inc/constants.hpp"
 #include <iostream>
 #include <netinet/in.h> // sockaddr, sockaddr_in, sockaddr_in6
 #include <sys/socket.h> // socket(), connect(), bind(), listen(), accept()
@@ -14,12 +15,12 @@ private:
 
 public:
   // TCP Socket Constructor
-  TCP_socket(SocketType type, int port = 6396) {
+  TCP_socket(SocketType type, int port = -1) {
     // AF_INET 		- IPV4
     // SOCK_STREAM 	- TCP Connection
     // 0			- Defines the protocol, 0 means we want IP
     // protocol
-    this->port = port;
+    this->port = (port == -1) ? Constants::server_port : port;
     socketFD = socket(AF_INET, SOCK_STREAM, 0);
     if (socketFD < 0) {
       std::cerr << "ERROR:: Socket Creation Failed.\n";

@@ -9,7 +9,7 @@ class RedisCommandHandler {
 public:
   RedisCommandHandler();
   ~RedisCommandHandler();
-  std::string processCommand(std::string command);
+  std::string processCommand(const std::string& command);
 };
 
 #endif

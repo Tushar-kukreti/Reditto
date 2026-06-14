@@ -12,5 +12,6 @@ private:
   int port;
   TCP_socket socket_server;
   std::atomic<bool> running;
+  void setupSignalHandler();
 };
 #endif
