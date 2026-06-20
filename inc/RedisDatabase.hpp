@@ -23,7 +23,7 @@ public:
     bool get(const std::string& key, std::string& value);
     bool type(const std::string&key, std::string& value);
     bool keys(std::vector<std::string>&keyList);
-    bool expire(const std::string&key, const std::string&seconds);
+    bool expire(const std::string&key, const int seconds);
     bool del(const std::vector<std::string>&keys);
     bool rename(const std::string&oldKey, const std::string&newKey);
 

@@ -6,11 +6,18 @@
 #include <cstring>
 #include <thread>
 #include <signal.h>
+#include <vector>
+#include <mutex>
+#include <algorithm>
 
 static RedisServer *globalServer = nullptr;
+static std::vector<int> active_client_sockets;
+static std::mutex clients_mutex;
+
 RedisServer::RedisServer(int port)
     : port(port), socket_server(SocketType::SERVER, port), running(true) {
   globalServer = this;
+  setupSignalHandler();
 }
 
 void signalHandler(int signum){
@@ -32,6 +39,12 @@ void RedisServer::listen() {
     int clientSocketFD = socket_server.acceptClient();
     if (clientSocketFD == -1) continue;
 
+    // Track the new client socket securely
+    {
+      std::lock_guard<std::mutex> lock(clients_mutex);
+      active_client_sockets.push_back(clientSocketFD);
+    }
+
     // Handle client in seperate threads to make Redis server concurrent
     clientThreads.emplace_back([clientSocketFD, this, &commandHandler]() {
       char buff[1024];
@@ -48,6 +61,14 @@ void RedisServer::listen() {
 
       // Closing the client socket to free up the resources
       socket_server.closeSocket(clientSocketFD);
+
+      // Remove from active clients list
+      {
+        std::lock_guard<std::mutex> lock(clients_mutex);
+        active_client_sockets.erase(
+            std::remove(active_client_sockets.begin(), active_client_sockets.end(), clientSocketFD),
+            active_client_sockets.end());
+      }
     });
   }
 
@@ -68,4 +89,10 @@ void RedisServer::terminate() {
   std::cout << "Port " << port << " is now closed for new connections.\n";
   running = false;
   socket_server.terminate();
+
+  // Force close all connected clients so their threads unblock and exit
+  std::lock_guard<std::mutex> lock(clients_mutex);
+  for (int fd : active_client_sockets) {
+    socket_server.closeSocket(fd);
+  }
 }

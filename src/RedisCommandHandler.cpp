@@ -96,8 +96,15 @@ static bool delCommand(const std::vector<std::string>& tokens, std::ostringstrea
 static bool expireCommand(const std::vector<std::string>& tokens, std::ostringstream&response, RedisDatabase&db){
   if (tokens.size() < 3) response << "-Error EXPIRE requires key and seconds\r\n";
   else {
-    if (db.expire(tokens[1], tokens[2])) response << "+OK\r\n";
-    else response << "-Error Failed to set expire time\r\n";
+    int seconds = 0;
+    try {
+      seconds = std::stoi(tokens[2]);
+      if (db.expire(tokens[1], seconds)) response << "+OK\r\n";
+      else response << "-Error Failed to set expire time\r\n";
+    } catch (...){
+      response << "-Error Invalid parameter for EXPIRE command: " << tokens[2] << "\r\n";
+      return false;
+    }
   }
   return true;
 }
