@@ -17,6 +17,20 @@ bool RedisDatabase::flushALL(){
     return true;
 }
 
+// remove expired keys before opertiion
+void RedisDatabase::syncExpiry(){
+    auto now = std::chrono::steady_clock::now();
+    auto it = expire_store.begin();
+    while (it != expire_store.end()){
+        if (now < it->second) {it++;}
+        else {
+            kv_store.erase(it->first);
+            list_store.erase(it->first);
+            hash_store.erase(it->first);
+            it = expire_store.erase(it);
+        }
+    }
+}
 // Key commands
 bool RedisDatabase::set(const std::string& key, const std::string& value){   
     std::lock_guard<std::mutex> lock(db_mutex);

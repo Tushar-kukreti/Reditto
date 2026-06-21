@@ -68,7 +68,7 @@ public:
             sz = 0;
             Node* current = other.head;
             while (current) {
-                push_back(const_cast<std::string&>(current->val));
+                push_back(current->val);
                 current = current->next;
             }
         }

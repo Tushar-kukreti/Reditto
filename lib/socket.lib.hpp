@@ -16,6 +16,9 @@ private:
 
 public:
   // TCP Socket Constructor
+  TCP_socket(const TCP_socket&) = delete;
+  TCP_socket&operator=(const TCP_socket&) = delete;
+
   TCP_socket(SocketType type, int port = -1) {
     // AF_INET 		- IPV4
     // SOCK_STREAM 	- TCP Connection
@@ -49,8 +52,7 @@ public:
   }
   // Terminate Method for the util
   void terminate() {
-    if (socketFD == -1)
-      return;
+    if (socketFD == -1) return;
     shutdown(socketFD, SHUT_RDWR);
     close(socketFD);
     socketFD = -1;
@@ -71,14 +73,14 @@ public:
     return address;
   }
 
-  // Method to connect a client to a server socket
-  int connectToIPV4(const char *ip, int port) {
-    if (socketFD == -1) {
-      std::cerr << "ERROR:: Socket not initialized.\n";
-    }
-    struct sockaddr_in address = getSocketAddress(ip, port);
-    return connect(socketFD, (struct sockaddr *)&address, sizeof(address));
-  }
+  // // Method to connect a client to a server socket
+  // int connectToIPV4(const char *ip, int port) {
+  //   if (socketFD == -1) {
+  //     std::cerr << "ERROR:: Socket not initialized.\n";
+  //   }
+  //   struct sockaddr_in address = getSocketAddress(ip, port);
+  //   return connect(socketFD, (struct sockaddr *)&address, sizeof(address));
+  // }
 
   // Method to Accept incomming Clients
   int acceptClient() {

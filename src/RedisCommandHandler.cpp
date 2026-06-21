@@ -444,6 +444,7 @@ std::string RedisCommandHandler::processCommand(const std::string& command) {
 
   auto it = commandDispatcher.find(cmd);
   if (it != commandDispatcher.end()) {
+    db.syncExpiry();
     it->second(tokens, response, db);
   }else {
     // Default case for unknown command
