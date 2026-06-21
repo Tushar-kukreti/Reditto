@@ -1,10 +1,11 @@
 #ifndef SOCKET_LIB_HPP
 #define SOCKET_LIB_HPP
-#include <arpa/inet.h> // inet_pton()
-#include "../../inc/constants.hpp"
+#include "../inc/constants.hpp"
 #include <iostream>
+#include <cstring>
 #include <netinet/in.h> // sockaddr, sockaddr_in, sockaddr_in6
 #include <sys/socket.h> // socket(), connect(), bind(), listen(), accept()
+#include <arpa/inet.h> // inet_pton()
 #include <unistd.h>     // close
 enum class SocketType { SERVER, CLIENT };
 

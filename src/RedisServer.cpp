@@ -2,7 +2,8 @@
 #include "../inc/RedisCommandHandler.hpp"
 #include "../inc/RedisDatabase.hpp"
 #include "../inc/constants.hpp"
-#include "../lib/socket/socket.lib.hpp"
+#include "../lib/socket.lib.hpp"
+#include <iostream>
 #include <cstring>
 #include <thread>
 #include <signal.h>

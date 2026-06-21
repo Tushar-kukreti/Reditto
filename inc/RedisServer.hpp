@@ -1,6 +1,6 @@
 #ifndef REDIS_SERVER_HPP
 #define REDIS_SERVER_HPP
-#include "../lib/socket/socket.lib.hpp"
+#include "../lib/socket.lib.hpp"
 #include <atomic>
 class RedisServer {
 public:
