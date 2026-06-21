@@ -2,6 +2,7 @@
 #define LINKED_LIST_LIB
 #include <iostream>
 #include <string>
+#include <vector>
 struct Node{
 public:
     std::string val;
@@ -49,14 +50,14 @@ private:
 public:
     // constructor
     LList(): sz(0), head(nullptr), tail(nullptr){};
-    LList(std::string&val){
+    LList(const std::string&val){
         tail = head = new Node(val);
         sz = 1;
     }
     LList(const LList& other) : sz(0), head(nullptr), tail(nullptr) {
         Node* current = other.head;
         while (current) {
-            push_back(const_cast<std::string&>(current->val));
+            push_back(current->val);
             current = current->next;
         }
     }
@@ -147,7 +148,7 @@ public:
         return res;
     }    
     
-    const int removeElements(const std::string&value, int count = 1, int dir = 0){
+    int removeElements(const std::string&value, int count = 1, int dir = 0){
         if (count <= 0) return 0;
         Node *tmp = (dir) ? head : tail;
         int cnt = 0;
@@ -161,8 +162,8 @@ public:
         return cnt;
     }
 
-    const std::string findAtIndex(int ind){
-        if (ind >= sz) return "";
+    std::string findAtIndex(int ind){
+        if (ind >= ((int)sz)) return "";
         Node *tmp = head;
         for (int i = 0; i < ind; i++){
             tmp = tmp->next;
