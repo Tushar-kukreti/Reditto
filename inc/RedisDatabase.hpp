@@ -21,6 +21,8 @@ private:
     std::unordered_map<std::string, std::unordered_map<std::string, std::string>> hash_store;
     std::unordered_map<std::string, std::chrono::steady_clock::time_point> expire_store;
 public:
+    // sync expiry keys with commands
+    void syncExpiry();
     static RedisDatabase& getInstance();
     // System commands
     bool flushALL();
