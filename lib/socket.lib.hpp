@@ -1,9 +1,11 @@
 #ifndef SOCKET_LIB_HPP
 #define SOCKET_LIB_HPP
-#include <arpa/inet.h> // inet_pton()
+#include "../inc/constants.hpp"
 #include <iostream>
+#include <cstring>
 #include <netinet/in.h> // sockaddr, sockaddr_in, sockaddr_in6
 #include <sys/socket.h> // socket(), connect(), bind(), listen(), accept()
+#include <arpa/inet.h> // inet_pton()
 #include <unistd.h>     // close
 enum class SocketType { SERVER, CLIENT };
 
@@ -14,19 +16,19 @@ private:
 
 public:
   // TCP Socket Constructor
-  TCP_socket(SocketType type, int port = 6396) {
+  TCP_socket(SocketType type, int port = -1) {
     // AF_INET 		- IPV4
     // SOCK_STREAM 	- TCP Connection
     // 0			- Defines the protocol, 0 means we want IP
     // protocol
-    this->port = port;
+    this->port = (port == -1) ? Constants::server_port : port;
     socketFD = socket(AF_INET, SOCK_STREAM, 0);
     if (socketFD < 0) {
       std::cerr << "ERROR:: Socket Creation Failed.\n";
     } else {
       std::cout << "Socket created successfully.\n";
     }
-    // in standard socket connection OS adds a time-delay of 60 sec, after
+    // In standard socket connection OS adds a time-delay of 60 sec, after
     // socket connection termination to make sure that all the packets are
     // transfered correctly and no data is lost. to turn off this feature and
     // reuse the port immediately after termination we use SO_REUSEADDR.
@@ -47,12 +49,17 @@ public:
   }
   // Terminate Method for the util
   void terminate() {
+    if (socketFD == -1)
+      return;
     shutdown(socketFD, SHUT_RDWR);
     close(socketFD);
+    socketFD = -1;
     std::cout << "Socket closed successfully.\n";
   }
   // Destructor
   ~TCP_socket() { terminate(); }
+
+  // Method to create a socket address
   struct sockaddr_in getSocketAddress(const char *ip, int port) {
     struct sockaddr_in address;
     address.sin_port = htons(port);
@@ -63,26 +70,84 @@ public:
       inet_pton(AF_INET, ip, &address.sin_addr.s_addr);
     return address;
   }
+
   // Method to connect a client to a server socket
   int connectToIPV4(const char *ip, int port) {
+    if (socketFD == -1) {
+      std::cerr << "ERROR:: Socket not initialized.\n";
+    }
     struct sockaddr_in address = getSocketAddress(ip, port);
     return connect(socketFD, (struct sockaddr *)&address, sizeof(address));
   }
+
+  // Method to Accept incomming Clients
+  int acceptClient() {
+    int clientSocket = accept(socketFD, nullptr, nullptr);
+    if (clientSocket < 0) {
+      std::cerr << "ERROR:: Failed to Accept the client connection.";
+      return -1;
+    }
+    std::cout << "Client Connected on port " << port << ".\n";
+    return clientSocket;
+  }
+
   // Method to listen for a incomming clients
   void listenClient(int backlog = 10) {
+    if (socketFD == -1) {
+      std::cerr << "ERROR:: Socket not initialized.\n";
+      return;
+    }
+
     if (listen(socketFD, backlog) < 0) {
       std::cerr << "ERROR:: Socket Listening Failed.\n";
     } else {
       std::cout << "Socket listening on port " << port << ".\n";
     }
   }
+
   // Method to send data
-  int sendData(const char *data) {
-    return send(socketFD, data, strlen(data), 0);
+  int sendData(const char *data, int sz, int customSocketFD = -1) {
+    if (customSocketFD == -1)
+      customSocketFD = socketFD;
+    if (customSocketFD == -1) {
+      std::cerr << "ERROR:: Socket not initialized.\n";
+      return -1;
+    }
+    int bytes_sent = send(customSocketFD, data, sz, 0);
+    if (bytes_sent < 0)
+      std::cerr << "ERROR:: Failed to send data.\n";
+    return bytes_sent;
   }
+
   // Method to receive Data
-  int receiveData(char *buff, int sz) { return recv(socketFD, buff, sz, 0); }
+  int receiveData(char *buff, int sz, int customSocketFD = -1) {
+    if (customSocketFD == -1)
+      customSocketFD = socketFD;
+    if (customSocketFD == -1) {
+      std::cerr << "ERROR:: Socket not initialized.\n";
+      return -1;
+    }
+    int bytes_recv = recv(customSocketFD, buff, sz - 1, 0);
+    if (bytes_recv <= 0) {
+      std::cerr << "ERROR:: Failed to receive data.\n";
+      return -1;
+    }
+    buff[bytes_recv] = '\0';
+    return bytes_recv;
+  }
+
   // To Return the socket fd
   int getSocketFD() { return socketFD; }
+
+  // To close socket fd
+  void closeSocket(int customSocketFD = -1) {
+    if (customSocketFD == -1)
+      customSocketFD = socketFD;
+    if (customSocketFD == -1)
+      return;
+    close(customSocketFD);
+    if (customSocketFD == socketFD)
+      socketFD = -1;
+  }
 };
 #endif

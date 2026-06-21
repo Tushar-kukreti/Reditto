@@ -8,6 +8,9 @@
 *.obj
 obj/
 
+# database files (crdb)
+*.crdb
+
 # Precompiled Headers
 *.gch
 *.pch
